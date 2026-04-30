@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE9DA"/>
+      <stop offset="100%" stop-color="#F4C9C9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="110" ry="110" fill="url(#iconBg)"/>
+
+  <!-- Subtle sakura watermark, top-right corner -->
+  <g transform="translate(420, 90)" opacity="0.4">
+    <circle cx="0" cy="-15" r="11" fill="#FFB6C1"/>
+    <circle cx="15" cy="-4" r="11" fill="#FFB6C1"/>
+    <circle cx="9" cy="13" r="11" fill="#FFB6C1"/>
+    <circle cx="-9" cy="13" r="11" fill="#FFB6C1"/>
+    <circle cx="-15" cy="-4" r="11" fill="#FFB6C1"/>
+    <circle cx="0" cy="0" r="5" fill="#FFCC55"/>
+  </g>
+
+  <!-- Centered doll, rose palette -->
+  <g transform="translate(96, 96) scale(3.2)">
+    <ellipse cx="33" cy="22" rx="7" ry="13" fill="#FFE4E4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="67" cy="22" rx="7" ry="13" fill="#FFE4E4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="33" cy="24" rx="3" ry="8" fill="#F4A4A4" opacity="0.7"/>
+    <ellipse cx="67" cy="24" rx="3" ry="8" fill="#F4A4A4" opacity="0.7"/>
+    <circle cx="50" cy="42" r="22" fill="#FFD4D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="50" cy="76" rx="24" ry="20" fill="#FFD4D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="42" cy="78" rx="3" ry="6" fill="#FF9999" opacity="0.4"/>
+    <ellipse cx="58" cy="78" rx="3" ry="6" fill="#FF9999" opacity="0.4"/>
+    <circle cx="42" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="58" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="43" cy="39" r="0.8" fill="white"/>
+    <circle cx="59" cy="39" r="0.8" fill="white"/>
+    <path d="M 45 48 Q 50 51 55 48" stroke="#2A2A33" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="46" r="2.5" fill="#F4A4A4" opacity="0.6"/>
+    <circle cx="62" cy="46" r="2.5" fill="#F4A4A4" opacity="0.6"/>
+  </g>
+</svg>

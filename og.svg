@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF7EE"/>
+      <stop offset="55%" stop-color="#FFE9DA"/>
+      <stop offset="100%" stop-color="#FFD4D4"/>
+    </linearGradient>
+    <radialGradient id="glow-mint" cx="15%" cy="85%" r="35%">
+      <stop offset="0%" stop-color="#BFE3D4" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#BFE3D4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-lilac" cx="85%" cy="25%" r="30%">
+      <stop offset="0%" stop-color="#D7C9E8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#D7C9E8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow-mint)"/>
+  <rect width="1200" height="630" fill="url(#glow-lilac)"/>
+
+  <!-- Sakura mark next to wordmark -->
+  <g transform="translate(118, 138)">
+    <circle cx="0" cy="-22" r="16" fill="#F4A4A4" opacity="0.92"/>
+    <circle cx="22" cy="-6" r="16" fill="#F4A4A4" opacity="0.92"/>
+    <circle cx="14" cy="19" r="16" fill="#F4A4A4" opacity="0.92"/>
+    <circle cx="-14" cy="19" r="16" fill="#F4A4A4" opacity="0.92"/>
+    <circle cx="-22" cy="-6" r="16" fill="#F4A4A4" opacity="0.92"/>
+    <circle cx="0" cy="0" r="7" fill="#FFCC55"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="180" y="170" font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif" font-size="108" font-weight="900" fill="#2A2A33" letter-spacing="-2">doll_trip</text>
+
+  <!-- Tagline -->
+  <text x="120" y="265" font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif" font-size="54" font-weight="800" fill="#2A2A33">帶娃出門·記錄日常</text>
+
+  <!-- Description -->
+  <text x="120" y="332" font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif" font-size="28" fill="#6E6E7A" font-weight="500">為台灣 Z 世代設計的 vertical-niche</text>
+  <text x="120" y="372" font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif" font-size="28" fill="#6E6E7A" font-weight="500">曬娃儀式平台 prototype</text>
+
+  <!-- Schema chips: Character × Location × Moment -->
+  <g transform="translate(120, 425)">
+    <rect x="0" y="0" width="160" height="50" rx="25" fill="#F4C9C9"/>
+    <text x="80" y="33" text-anchor="middle" font-family="'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif" font-size="24" font-weight="700" fill="#2A2A33">角色</text>
+
+    <text x="178" y="36" font-family="system-ui, sans-serif" font-size="32" font-weight="300" fill="#6E6E7A">×</text>
+
+    <rect x="208" y="0" width="160" height="50" rx="25" fill="#BFE3D4"/>
+    <text x="288" y="33" text-anchor="middle" font-family="'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif" font-size="24" font-weight="700" fill="#2A2A33">地點</text>
+
+    <text x="386" y="36" font-family="system-ui, sans-serif" font-size="32" font-weight="300" fill="#6E6E7A">×</text>
+
+    <rect x="416" y="0" width="160" height="50" rx="25" fill="#D7C9E8"/>
+    <text x="496" y="33" text-anchor="middle" font-family="'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif" font-size="24" font-weight="700" fill="#2A2A33">時刻</text>
+  </g>
+
+  <!-- URL -->
+  <text x="120" y="568" font-family="'Cascadia Code', 'Consolas', monospace" font-size="22" fill="#2A2A33" font-weight="700">everydayadventuredev.github.io/doll-trip</text>
+
+  <!-- Right side: 3 dolls scattered, different palettes -->
+
+  <!-- Doll 1: rin (yellow), top -->
+  <g transform="translate(820, 90) scale(1.7) rotate(-8 50 50)">
+    <ellipse cx="33" cy="22" rx="7" ry="13" fill="#FFEEC2" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="67" cy="22" rx="7" ry="13" fill="#FFEEC2" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="33" cy="24" rx="3" ry="8" fill="#FFD56B" opacity="0.7"/>
+    <ellipse cx="67" cy="24" rx="3" ry="8" fill="#FFD56B" opacity="0.7"/>
+    <circle cx="50" cy="42" r="22" fill="#FFE9B0" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="50" cy="76" rx="24" ry="20" fill="#FFE9B0" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="42" cy="78" rx="3" ry="6" fill="#FFCC55" opacity="0.4"/>
+    <ellipse cx="58" cy="78" rx="3" ry="6" fill="#FFCC55" opacity="0.4"/>
+    <circle cx="42" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="58" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="43" cy="39" r="0.8" fill="white"/>
+    <circle cx="59" cy="39" r="0.8" fill="white"/>
+    <path d="M 45 48 Q 50 51 55 48" stroke="#2A2A33" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="46" r="2.5" fill="#FFD56B" opacity="0.6"/>
+    <circle cx="62" cy="46" r="2.5" fill="#FFD56B" opacity="0.6"/>
+  </g>
+
+  <!-- Doll 2: rose (pink), middle right -->
+  <g transform="translate(990, 290) scale(1.55) rotate(7 50 50)">
+    <ellipse cx="33" cy="22" rx="7" ry="13" fill="#FFE4E4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="67" cy="22" rx="7" ry="13" fill="#FFE4E4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="33" cy="24" rx="3" ry="8" fill="#F4A4A4" opacity="0.7"/>
+    <ellipse cx="67" cy="24" rx="3" ry="8" fill="#F4A4A4" opacity="0.7"/>
+    <circle cx="50" cy="42" r="22" fill="#FFD4D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="50" cy="76" rx="24" ry="20" fill="#FFD4D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="42" cy="78" rx="3" ry="6" fill="#FF9999" opacity="0.4"/>
+    <ellipse cx="58" cy="78" rx="3" ry="6" fill="#FF9999" opacity="0.4"/>
+    <circle cx="42" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="58" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="43" cy="39" r="0.8" fill="white"/>
+    <circle cx="59" cy="39" r="0.8" fill="white"/>
+    <path d="M 45 48 Q 50 51 55 48" stroke="#2A2A33" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="46" r="2.5" fill="#F4A4A4" opacity="0.6"/>
+    <circle cx="62" cy="46" r="2.5" fill="#F4A4A4" opacity="0.6"/>
+  </g>
+
+  <!-- Doll 3: mint (ren), bottom left of right area -->
+  <g transform="translate(750, 410) scale(1.45) rotate(-4 50 50)">
+    <ellipse cx="33" cy="22" rx="7" ry="13" fill="#D4F5E2" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="67" cy="22" rx="7" ry="13" fill="#D4F5E2" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="33" cy="24" rx="3" ry="8" fill="#7AC4A0" opacity="0.7"/>
+    <ellipse cx="67" cy="24" rx="3" ry="8" fill="#7AC4A0" opacity="0.7"/>
+    <circle cx="50" cy="42" r="22" fill="#BFE3D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="50" cy="76" rx="24" ry="20" fill="#BFE3D4" stroke="white" stroke-width="2.5"/>
+    <ellipse cx="42" cy="78" rx="3" ry="6" fill="#5BAA85" opacity="0.4"/>
+    <ellipse cx="58" cy="78" rx="3" ry="6" fill="#5BAA85" opacity="0.4"/>
+    <circle cx="42" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="58" cy="40" r="3" fill="#2A2A33"/>
+    <circle cx="43" cy="39" r="0.8" fill="white"/>
+    <circle cx="59" cy="39" r="0.8" fill="white"/>
+    <path d="M 45 48 Q 50 51 55 48" stroke="#2A2A33" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="46" r="2.5" fill="#7AC4A0" opacity="0.6"/>
+    <circle cx="62" cy="46" r="2.5" fill="#7AC4A0" opacity="0.6"/>
+  </g>
+
+</svg>
