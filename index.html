@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>doll_trip · 帶娃出門記錄日常</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+  :root {
+    --rose: #F4C9C9;
+    --rose-dark: #E8A4A4;
+    --cream: #FFF7EE;
+    --ink: #2A2A33;
+    --ink-soft: #6E6E7A;
+    --mint: #BFE3D4;
+    --gold: #E5C78F;
+    --lilac: #D7C9E8;
+    --sky: #BCE4FF;
+  }
+  body {
+    font-family: 'Noto Sans TC', 'Zen Maru Gothic', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .glass {
+    background: rgba(255, 247, 238, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: white;
+    border: 1px solid rgba(42,42,51,0.08);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .chip-rose { background: var(--rose); }
+  .chip-mint { background: var(--mint); }
+  .chip-gold { background: var(--gold); }
+  .chip-lilac { background: var(--lilac); }
+  .card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+  }
+  .photo {
+    aspect-ratio: 1;
+    background-size: cover;
+    background-position: center;
+    background-color: #FFE4D2;
+    position: relative;
+    filter: saturate(1.05) contrast(0.98);
+  }
+  .photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 50%, rgba(255,193,150,0.15));
+    pointer-events: none;
+  }
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.55));
+    color: white;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 2;
+  }
+  .doll-overlay {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    z-index: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    transform: rotate(-6deg);
+    transition: transform 0.3s;
+  }
+  .doll-overlay-photo {
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+  .card:hover .doll-overlay {
+    transform: rotate(-2deg) scale(1.05);
+  }
+  .doll-overlay-large {
+    bottom: 12px;
+    right: 12px;
+    transform: rotate(-4deg);
+  }
+  .badge-orb {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--rose), var(--gold));
+    box-shadow: 0 4px 12px rgba(229,199,143,0.4);
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { scrollbar-width: none; }
+  .ai-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-enter {
+    animation: modalEnter 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes modalEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .toast-enter {
+    animation: toastEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes toastEnter {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ADE80;
+    animation: pulse 2s infinite;
+    display: inline-block;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .map-bg {
+    background-image:
+      radial-gradient(circle at 30% 40%, rgba(244,201,201,0.4) 0, transparent 30%),
+      radial-gradient(circle at 70% 60%, rgba(191,227,212,0.4) 0, transparent 30%),
+      radial-gradient(circle at 50% 80%, rgba(215,201,232,0.3) 0, transparent 25%),
+      linear-gradient(135deg, #FFF7EE 0%, #FFEDE0 100%);
+  }
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 30;
+    background: rgba(255,247,238,0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(42,42,51,0.06);
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 4px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .nav-tab.active { color: var(--ink); }
+  .nav-center {
+    flex: 0 0 auto;
+    margin: 0 12px;
+  }
+  .nav-center button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2A2A33, #4A4A55);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(42,42,51,0.4);
+    transform: translateY(-18px);
+    border: 4px solid var(--cream);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-center button:hover {
+    transform: translateY(-22px);
+    box-shadow: 0 12px 32px rgba(42,42,51,0.5);
+  }
+  .nav-center button:active {
+    transform: translateY(-14px) scale(0.95);
+  }
+  .photo-drop {
+    border: 2px dashed rgba(42,42,51,0.2);
+    border-radius: 18px;
+    padding: 32px 16px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: rgba(255,255,255,0.5);
+  }
+  .photo-drop:hover {
+    border-color: var(--rose-dark);
+    background: rgba(244,201,201,0.1);
+  }
+  .photo-drop.has-photo {
+    padding: 0;
+    border: none;
+    background: transparent;
+    aspect-ratio: 1;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .form-section {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    border: 1px solid rgba(42,42,51,0.06);
+  }
+  [x-cloak] { display: none !important; }
+  .swatch {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.04);
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.active {
+    box-shadow: 0 0 0 3px var(--ink), 0 4px 12px rgba(0,0,0,0.15);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+
+<body x-data="dollTrip" x-cloak>
+
+<!-- Header -->
+<header class="glass sticky top-0 z-40 border-b border-black/5">
+  <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">🌸</span>
+      <div>
+        <div class="font-bold text-lg leading-none flex items-center gap-1.5">
+          doll_trip
+          <span class="text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">prototype</span>
+        </div>
+        <div class="text-[10px] text-neutral-500 mt-0.5" x-text="view==='home' ? '我的紀錄' : '探索'"></div>
+      </div>
+    </div>
+    <button class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-200 to-amber-200 flex items-center justify-center text-sm font-bold">娃</button>
+  </div>
+</header>
+
+<main class="max-w-md mx-auto pb-32 min-h-screen">
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- HOME TAB（我的紀錄 — 主流程入口）       -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <section x-show="view==='home'" class="px-4 py-4 space-y-5">
+
+    <!-- 主 CTA：你今天要帶誰出門 -->
+    <div class="bg-gradient-to-br from-neutral-900 to-neutral-700 text-white rounded-3xl p-5 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-rose-300/20 blur-3xl"></div>
+      <div class="absolute -bottom-4 -left-4 w-32 h-32 rounded-full bg-amber-300/15 blur-2xl"></div>
+      <div class="relative">
+        <div class="text-[11px] uppercase tracking-wider opacity-70 mb-1">今天</div>
+        <div class="text-xl font-bold leading-tight mb-4">你要帶誰出門？</div>
+
+        <!-- 你的娃 row -->
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
+          <template x-for="c in myDolls" :key="c.id">
+            <button @click="quickRecordWith(c.id)" class="flex-shrink-0 text-center">
+              <div class="w-14 h-14 rounded-2xl mb-1 flex items-center justify-center bg-white/15 backdrop-blur" :style="`background: ${characterBg(c.id)}`">
+                <template x-if="c.photo">
+                  <div class="w-12 h-12 rounded-xl bg-cover bg-center" :style="`background-image: url(${c.photo})`"></div>
+                </template>
+                <template x-if="!c.photo">
+                  <div x-html="dollSvg(c.id, 44)"></div>
+                </template>
+              </div>
+              <div class="text-[9px] font-medium truncate w-14" x-text="c.name"></div>
+            </button>
+          </template>
+          <button @click="openAddDoll()" class="flex-shrink-0 text-center">
+            <div class="w-14 h-14 rounded-2xl mb-1 bg-white/10 border-2 border-dashed border-white/40 flex items-center justify-center text-2xl text-white/70">+</div>
+            <div class="text-[9px] text-white/70 w-14">加入娃</div>
+          </button>
+        </div>
+
+        <!-- 主要 CTA -->
+        <button @click="openCreateModal()" class="w-full py-3.5 bg-white text-neutral-900 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg">
+          <span class="text-lg">📸</span>
+          <span>立即記錄一筆曬娃</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 你的數字 -->
+    <div class="grid grid-cols-3 gap-2">
+      <div class="bg-white rounded-2xl py-3 text-center border border-black/5">
+        <div class="font-bold text-xl" x-text="myMoments.length"></div>
+        <div class="text-[10px] text-neutral-500">打卡</div>
+      </div>
+      <div class="bg-white rounded-2xl py-3 text-center border border-black/5">
+        <div class="font-bold text-xl" x-text="myMoments.map(m=>m.location).filter((v,i,a)=>a.indexOf(v)===i).length"></div>
+        <div class="text-[10px] text-neutral-500">地點</div>
+      </div>
+      <div class="bg-white rounded-2xl py-3 text-center border border-black/5">
+        <div class="font-bold text-xl" x-text="badges.filter(b=>b.unlocked).length"></div>
+        <div class="text-[10px] text-neutral-500">徽章</div>
+      </div>
+    </div>
+
+    <!-- 今日推薦（基於你的娃） -->
+    <template x-if="myDolls.length > 0 && todaySuggestion">
+      <div class="bg-white rounded-2xl border border-black/5 overflow-hidden">
+        <div class="px-4 pt-3 pb-1 flex items-center justify-between">
+          <div class="text-xs font-bold flex items-center gap-1.5">
+            <span class="pulse-dot"></span>
+            今日適合帶 <span class="text-rose-500" x-text="characters[todaySuggestion.charId].name"></span>
+          </div>
+          <span class="text-[10px] text-neutral-400">換一個 →</span>
+        </div>
+        <div class="px-4 py-3 flex items-center gap-3" @click="openLocation(todaySuggestion.locId)">
+          <div class="w-16 h-16 rounded-xl bg-cover bg-center flex-shrink-0" :style="`background-image: url(${locations[todaySuggestion.locId].image})`"></div>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-sm truncate" x-text="locations[todaySuggestion.locId].name"></div>
+            <div class="text-[11px] text-neutral-500 truncate" x-text="locations[todaySuggestion.locId].area"></div>
+            <div class="text-[10px] text-neutral-600 mt-1" x-text="`${todaySuggestion.peerCount} 個推主在這拍過你的角色`"></div>
+          </div>
+          <div class="text-neutral-300">→</div>
+        </div>
+      </div>
+    </template>
+
+    <!-- 你的最近紀錄 -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-sm font-bold">你的最近紀錄</div>
+        <div class="text-xs text-neutral-400" x-text="`${myMoments.length} 則`"></div>
+      </div>
+
+      <template x-if="myMoments.length === 0">
+        <div class="bg-white rounded-2xl border border-dashed border-neutral-300 p-8 text-center">
+          <div class="text-4xl mb-2">🌸</div>
+          <div class="text-sm font-bold mb-1">還沒有紀錄</div>
+          <div class="text-[11px] text-neutral-500 mb-4">從第一次曬娃開始</div>
+          <button @click="openCreateModal()" class="px-4 py-2 bg-neutral-900 text-white rounded-full text-xs font-bold">📸 開始記錄</button>
+        </div>
+      </template>
+
+      <template x-if="myMoments.length > 0">
+        <div class="grid grid-cols-2 gap-2">
+          <template x-for="m in myMoments.slice().reverse()" :key="m.id">
+            <div class="card" @click="openMoment(m.id)">
+              <div class="photo" :style="`background-image: url(${m.photo})`">
+                <div class="doll-overlay" x-html="dollOverlayHtml(m.character, 56)"></div>
+                <div class="photo-overlay">
+                  <div class="text-[10px] opacity-80" x-text="characters[m.character].name"></div>
+                  <div class="text-xs font-bold leading-tight" x-text="`@${locations[m.location].name}`"></div>
+                </div>
+                <template x-if="m.isNew">
+                  <div class="absolute top-2 left-2 z-10 px-2 py-0.5 bg-emerald-500 text-white text-[9px] rounded-full font-bold">NEW</div>
+                </template>
+              </div>
+              <div class="p-2">
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="t in m.vibes.slice(0,2)" :key="t">
+                    <span class="text-[10px] px-1.5 py-0.5 bg-neutral-100 rounded-full" x-text="`#${t}`"></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <!-- 徽章 -->
+    <div>
+      <div class="text-sm font-bold mb-3">收集的徽章</div>
+      <div class="grid grid-cols-4 gap-3">
+        <template x-for="b in badges" :key="b.id">
+          <div class="text-center" :class="b.unlocked ? '' : 'opacity-30'">
+            <div class="badge-orb mx-auto mb-1" x-text="b.icon"></div>
+            <div class="text-[10px] font-bold leading-tight" x-text="b.name"></div>
+            <div class="text-[9px] text-neutral-500" x-text="b.unlocked ? '已解鎖' : `${b.progress}/${b.total}`"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- 你追蹤的角色有新動態 -->
+    <template x-if="trackedFeed.length > 0">
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-bold">你帶過的角色 · 別人剛拍了</div>
+          <div class="text-[10px] text-neutral-400">cross-discovery</div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <template x-for="m in trackedFeed" :key="m.id">
+            <div class="card" @click="openMoment(m.id)">
+              <div class="photo" :style="`background-image: url(${m.photo})`">
+                <div class="doll-overlay" x-html="dollOverlayHtml(m.character, 36)"></div>
+                <div class="photo-overlay">
+                  <div class="text-[9px] font-bold truncate" x-text="locations[m.location].name"></div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- prototype disclaimer -->
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-[11px] text-amber-900 leading-relaxed">
+      <div class="font-bold mb-1">💡 這是 prototype demo</div>
+      所有資料皆為 mock data。AI 修圖、上傳娃娃、登入等功能皆為展示性 UI，未連接後端。新增的娃娃和打卡僅存在這次瀏覽 session 中。
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- EXPLORE TAB（探索 — 次要：跨類發現）   -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <section x-show="view==='explore'" class="px-4 py-4 space-y-6">
+
+    <!-- Hero: cross-discovery 賣點 -->
+    <div class="map-bg rounded-3xl p-5 relative overflow-hidden">
+      <div class="text-xs text-neutral-500 mb-1">本週推薦</div>
+      <div class="text-xl font-bold leading-tight mb-2">
+        鏡音リン 在台灣<br>被 <span class="text-rose-500" x-text="momentsBy('rin').map(m=>m.user).filter((v,i,a)=>a.indexOf(v)===i).length"></span> 位推主帶去過 <span class="text-rose-500" x-text="momentsBy('rin').map(m=>m.location).filter((v,i,a)=>a.indexOf(v)===i).length"></span> 個地點
+      </div>
+      <div class="text-xs text-neutral-600 mb-4">這是 IG / Threads 永遠做不到的事</div>
+      <div class="flex gap-2">
+        <button @click="openCharacter('rin')" class="px-4 py-2 bg-neutral-900 text-white rounded-full text-xs font-medium">查看路線 →</button>
+        <button class="px-4 py-2 bg-white/80 rounded-full text-xs font-medium">換一個 IP</button>
+      </div>
+    </div>
+
+    <!-- Vibe 篩選 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-bold">用 vibe 探索</div>
+        <div class="text-xs text-neutral-400">tap to filter</div>
+      </div>
+      <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        <template x-for="v in vibes" :key="v.tag">
+          <button @click="vibeFilter = vibeFilter===v.tag ? null : v.tag"
+            :class="vibeFilter===v.tag ? 'ring-2 ring-neutral-900' : ''"
+            class="chip whitespace-nowrap" :style="`background: ${v.color}`">
+            <span x-text="v.icon"></span>
+            <span x-text="v.tag"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- 跨城串聯提示 -->
+    <div class="bg-white rounded-2xl p-4 border border-neutral-100">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="pulse-dot"></span>
+        <div class="text-xs text-neutral-500">跨城串聯</div>
+      </div>
+      <div class="text-sm">
+        <span class="font-bold">アーニャ</span> 上週在台北 5 個地點被打卡，<span class="text-emerald-600 font-bold">新北</span> 還是空白——你要當第一個嗎？
+      </div>
+    </div>
+
+    <!-- 熱門角色 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-bold">熱門角色</div>
+        <div class="text-[10px] text-neutral-400">點開看路線</div>
+      </div>
+      <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+        <template x-for="c in Object.values(characters).filter(c=>!c.userCreated)" :key="c.id">
+          <div class="flex-shrink-0 w-24 text-center" @click="openCharacter(c.id)">
+            <div class="w-20 h-20 rounded-2xl mx-auto mb-1.5 flex items-center justify-center" :style="`background: ${characterBg(c.id)}`">
+              <div x-html="dollSvg(c.id, 60)"></div>
+            </div>
+            <div class="text-xs font-bold truncate" x-text="c.name"></div>
+            <div class="text-[10px] text-neutral-500" x-text="`${momentsBy(c.id).length} 次打卡`"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- 友善地點 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-bold">友善地點</div>
+        <div class="text-[10px] text-neutral-400">哪些 IP 來過</div>
+      </div>
+      <div class="space-y-2">
+        <template x-for="l in Object.values(locations).slice(0,5)" :key="l.id">
+          <div class="card p-3" @click="openLocation(l.id)">
+            <div class="flex items-start gap-3">
+              <div class="w-14 h-14 rounded-xl bg-cover bg-center flex-shrink-0" :style="`background-image: url(${l.image})`"></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <div class="font-bold text-sm truncate" x-text="l.name"></div>
+                  <template x-if="l.friendly">
+                    <span class="text-[9px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">🍵</span>
+                  </template>
+                </div>
+                <div class="text-[11px] text-neutral-500 truncate" x-text="l.area"></div>
+                <div class="flex gap-2 text-[10px] text-neutral-600 mt-1">
+                  <span><span class="font-bold" x-text="momentsAt(l.id).map(m=>m.character).filter((v,i,a)=>a.indexOf(v)===i).length"></span> 個 IP</span>
+                  <span><span class="font-bold" x-text="momentsAt(l.id).length"></span> 次打卡</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- 社群最新打卡 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-bold">社群最新打卡</div>
+        <div class="text-xs text-neutral-400" x-text="`${filteredMoments.length} 則`"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <template x-for="m in filteredMoments" :key="m.id">
+          <div class="card" @click="openMoment(m.id)">
+            <div class="photo" :style="`background-image: url(${m.photo})`">
+              <div class="doll-overlay" x-html="dollOverlayHtml(m.character, 56)"></div>
+              <div class="photo-overlay">
+                <div class="text-[10px] opacity-80" x-text="characters[m.character].name"></div>
+                <div class="text-xs font-bold leading-tight" x-text="`@${locations[m.location].name}`"></div>
+              </div>
+            </div>
+            <div class="p-2">
+              <div class="flex flex-wrap gap-1">
+                <template x-for="t in m.vibes.slice(0,2)" :key="t">
+                  <span class="text-[10px] px-1.5 py-0.5 bg-neutral-100 rounded-full" x-text="`#${t}`"></span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- BOTTOM NAV                              -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<nav class="bottom-nav">
+  <div class="max-w-md w-full mx-auto flex items-center justify-around">
+    <button @click="view='home'" :class="view==='home' ? 'active' : ''" class="nav-tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C8 6 5 9 5 13a7 7 0 0 0 14 0c0-4-3-7-7-11z"/>
+      </svg>
+      <span class="text-[10px] font-bold">我的紀錄</span>
+    </button>
+
+    <div class="nav-center">
+      <button @click="openCreateModal()" aria-label="新打卡">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </button>
+    </div>
+
+    <button @click="view='explore'" :class="view==='explore' ? 'active' : ''" class="nav-tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <span class="text-[10px] font-bold">探索</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- CREATE MOMENT MODAL                     -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div x-show="modalCreate" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" @click.self="closeCreateModal()">
+  <div class="w-full max-w-md rounded-t-3xl sm:rounded-3xl modal-enter max-h-[92vh] overflow-y-auto" style="background: var(--cream)">
+    <div class="sticky top-0 z-10 border-b border-black/5 px-4 py-3 flex items-center justify-between" style="background: var(--cream)">
+      <button @click="closeCreateModal()" class="w-9 h-9 rounded-full hover:bg-black/5 flex items-center justify-center text-xl">×</button>
+      <div class="font-bold">新打卡</div>
+      <button @click="submitMoment()" :disabled="!canSubmit" :class="canSubmit ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-400'" class="px-4 py-1.5 rounded-full text-xs font-bold transition">
+        <span x-show="!isSubmitting">發布</span>
+        <span x-show="isSubmitting">發布中…</span>
+      </button>
+    </div>
+
+    <div class="p-4 space-y-4">
+
+      <!-- Photo upload -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>📸</span> 照片 <span class="text-rose-500">*</span>
+        </div>
+        <label class="photo-drop block" :class="form.photo ? 'has-photo' : ''" for="photo-input">
+          <template x-if="!form.photo">
+            <div>
+              <div class="text-3xl mb-2">📷</div>
+              <div class="text-sm font-medium text-neutral-700">點擊上傳照片</div>
+              <div class="text-[11px] text-neutral-500 mt-1">JPG / PNG · 最大 10MB</div>
+            </div>
+          </template>
+          <template x-if="form.photo">
+            <div class="relative w-full h-full">
+              <div class="photo aspect-square w-full" :style="`background-image: url(${form.photo})`">
+                <template x-if="form.character">
+                  <div class="doll-overlay doll-overlay-large" x-html="dollOverlayHtml(form.character, 80)"></div>
+                </template>
+              </div>
+              <button @click.prevent="form.photo=null" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center text-sm">×</button>
+              <template x-if="form.aiOn">
+                <div class="absolute top-2 left-2 px-2 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                  <span>✨</span> AI 修圖預覽
+                </div>
+              </template>
+            </div>
+          </template>
+        </label>
+        <input id="photo-input" type="file" accept="image/*" class="hidden" @change="handlePhotoUpload($event)">
+
+        <div class="mt-3 flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl">
+          <div>
+            <div class="text-xs font-bold">✨ AI 自動修圖</div>
+            <div class="text-[10px] text-neutral-600">去除路人 · 增強光線</div>
+          </div>
+          <button @click="form.aiOn = !form.aiOn" :class="form.aiOn ? 'bg-emerald-500' : 'bg-neutral-300'" class="relative w-11 h-6 rounded-full transition">
+            <div class="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all" :class="form.aiOn ? 'left-5' : 'left-0.5'"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Character select -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>🎭</span> 帶了哪個角色 <span class="text-rose-500">*</span>
+        </div>
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <!-- 你的娃 first -->
+          <template x-for="c in myDolls" :key="c.id">
+            <button @click="form.character = c.id"
+              :class="form.character === c.id ? 'ring-2 ring-neutral-900 ring-offset-2' : 'opacity-80'"
+              class="flex-shrink-0 w-16 text-center transition relative">
+              <div class="w-14 h-14 mx-auto rounded-2xl mb-1 flex items-center justify-center" :style="`background: ${characterBg(c.id)}`">
+                <template x-if="c.photo">
+                  <div class="w-12 h-12 rounded-xl bg-cover bg-center" :style="`background-image: url(${c.photo})`"></div>
+                </template>
+                <template x-if="!c.photo">
+                  <div x-html="dollSvg(c.id, 44)"></div>
+                </template>
+              </div>
+              <div class="text-[9px] font-medium truncate" x-text="c.name"></div>
+              <template x-if="c.userCreated">
+                <span class="absolute top-0 right-0 text-[8px] px-1 bg-emerald-500 text-white rounded-full">你的</span>
+              </template>
+            </button>
+          </template>
+
+          <!-- 其他人的（preset 但你沒帶過的） -->
+          <template x-for="c in Object.values(characters).filter(c=>!myDolls.find(md=>md.id===c.id))" :key="c.id">
+            <button @click="form.character = c.id"
+              :class="form.character === c.id ? 'ring-2 ring-neutral-900 ring-offset-2' : 'opacity-50'"
+              class="flex-shrink-0 w-16 text-center transition">
+              <div class="w-14 h-14 mx-auto rounded-2xl mb-1 flex items-center justify-center" :style="`background: ${characterBg(c.id)}`">
+                <div x-html="dollSvg(c.id, 44)"></div>
+              </div>
+              <div class="text-[9px] font-medium truncate" x-text="c.name"></div>
+            </button>
+          </template>
+
+          <!-- 新增按鈕 -->
+          <button @click="openAddDoll()" class="flex-shrink-0 w-16 text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl mb-1 bg-white border-2 border-dashed border-rose-300 flex items-center justify-center text-2xl text-rose-400">+</div>
+            <div class="text-[9px] font-medium text-rose-500">新增娃</div>
+          </button>
+        </div>
+        <div class="text-[10px] text-neutral-400 mt-2">
+          💡 你的娃會排在最前。
+        </div>
+      </div>
+
+      <!-- Location select -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>📍</span> 在哪裡 <span class="text-rose-500">*</span>
+        </div>
+        <button @click="useCurrentLocation()" class="w-full mb-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 hover:from-blue-100">
+          <span>📡</span> 用我目前位置（mock GPS）
+        </button>
+        <div class="space-y-1.5 max-h-44 overflow-y-auto">
+          <template x-for="l in Object.values(locations)" :key="l.id">
+            <button @click="form.location = l.id"
+              :class="form.location === l.id ? 'bg-neutral-900 text-white' : 'bg-white hover:bg-neutral-50'"
+              class="w-full p-2 rounded-xl text-left flex items-center gap-2 transition">
+              <div class="w-8 h-8 rounded-lg bg-cover bg-center flex-shrink-0" :style="`background-image: url(${l.image})`"></div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-medium truncate" x-text="l.name"></div>
+                <div class="text-[10px] opacity-70 truncate" x-text="l.area"></div>
+              </div>
+              <template x-if="l.friendly">
+                <span class="text-[9px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full flex-shrink-0" :class="form.location === l.id ? 'bg-emerald-200' : ''">🍵</span>
+              </template>
+            </button>
+          </template>
+        </div>
+        <button @click="alert('mock：下個版本支援自訂新地點 + 地圖選點')" class="w-full mt-2 px-3 py-2 bg-white border-2 border-dashed border-neutral-300 rounded-xl text-xs text-neutral-500 hover:border-neutral-400">
+          + 新增地點
+        </button>
+      </div>
+
+      <!-- Vibe -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>✨</span> Vibe 標籤
+          <span class="text-[10px] text-neutral-400 font-normal ml-1">(選 1-3 個)</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <template x-for="v in vibes" :key="v.tag">
+            <button @click="toggleVibe(v.tag)"
+              :class="form.vibes.includes(v.tag) ? 'ring-2 ring-neutral-900' : ''"
+              class="chip" :style="`background: ${v.color}`">
+              <span x-text="v.icon"></span>
+              <span x-text="v.tag"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Caption -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>📝</span> 描述
+        </div>
+        <textarea x-model="form.caption" placeholder="今天帶誰、去哪、發現了什麼..."
+          class="w-full p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-sm resize-none focus:outline-none focus:border-neutral-400"
+          rows="3"></textarea>
+        <div class="text-[10px] text-neutral-400 text-right mt-1" x-text="`${form.caption.length} / 200`"></div>
+      </div>
+
+      <div x-show="!canSubmit" x-cloak class="text-[11px] text-neutral-500 text-center">
+        還缺：<span x-text="missingFields"></span>
+      </div>
+
+      <div class="h-4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- ADD DOLL MODAL                          -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div x-show="modalAddDoll" x-cloak class="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" @click.self="closeAddDoll()">
+  <div class="w-full max-w-md rounded-t-3xl sm:rounded-3xl modal-enter max-h-[92vh] overflow-y-auto" style="background: var(--cream)">
+    <div class="sticky top-0 z-10 border-b border-black/5 px-4 py-3 flex items-center justify-between" style="background: var(--cream)">
+      <button @click="closeAddDoll()" class="w-9 h-9 rounded-full hover:bg-black/5 flex items-center justify-center text-xl">×</button>
+      <div class="font-bold">新增你的娃</div>
+      <button @click="saveNewDoll()" :disabled="!canSaveDoll" :class="canSaveDoll ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-400'" class="px-4 py-1.5 rounded-full text-xs font-bold transition">儲存</button>
+    </div>
+
+    <div class="p-4 space-y-4">
+
+      <!-- Photo upload (your doll) -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>📸</span> 你的娃照片 <span class="text-rose-500">*</span>
+        </div>
+        <label for="doll-photo-input" class="block cursor-pointer">
+          <template x-if="!dollForm.photo">
+            <div class="photo-drop">
+              <div class="text-3xl mb-2">🧸</div>
+              <div class="text-sm font-medium text-neutral-700">上傳娃娃近照</div>
+              <div class="text-[11px] text-neutral-500 mt-1">挑張正面、背景簡單的最好</div>
+            </div>
+          </template>
+          <template x-if="dollForm.photo">
+            <div class="relative">
+              <div class="aspect-square rounded-2xl bg-cover bg-center mx-auto max-w-[200px]" :style="`background-image: url(${dollForm.photo}); background-size: cover;`"></div>
+              <button @click.prevent="dollForm.photo=null" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center text-sm">×</button>
+            </div>
+          </template>
+        </label>
+        <input id="doll-photo-input" type="file" accept="image/*" class="hidden" @change="handleDollPhotoUpload($event)">
+      </div>
+
+      <!-- Name -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>🏷️</span> 娃娃名字 <span class="text-rose-500">*</span>
+        </div>
+        <input type="text" x-model="dollForm.name" placeholder="例：小白、リン醬、熊熊"
+          maxlength="20"
+          class="w-full p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-sm focus:outline-none focus:border-neutral-400">
+      </div>
+
+      <!-- Source -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>📚</span> 來源
+          <span class="text-[10px] text-neutral-400 font-normal">(選填)</span>
+        </div>
+        <input type="text" x-model="dollForm.source" placeholder="例：原創自製 / SPY×FAMILY / VOCALOID..."
+          maxlength="40"
+          class="w-full p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-sm focus:outline-none focus:border-neutral-400">
+      </div>
+
+      <!-- Palette -->
+      <div class="form-section">
+        <div class="text-xs font-bold mb-2 flex items-center gap-1.5">
+          <span>🎨</span> 代表色
+          <span class="text-[10px] text-neutral-400 font-normal">(用於 SVG 圖示)</span>
+        </div>
+        <div class="flex gap-3 justify-center flex-wrap">
+          <template x-for="p in palettes" :key="p.id">
+            <div class="text-center">
+              <div @click="dollForm.palette = p.id"
+                :class="dollForm.palette === p.id ? 'active' : ''"
+                class="swatch mx-auto mb-1"
+                :style="`background: linear-gradient(135deg, ${p.body}, ${p.accent})`"></div>
+              <div class="text-[10px] text-neutral-500" x-text="p.name"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <template x-if="dollForm.photo && dollForm.name">
+        <div class="form-section">
+          <div class="text-[10px] text-neutral-400 mb-2 uppercase tracking-wider">預覽</div>
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-cover bg-center flex-shrink-0" :style="`background-image: url(${dollForm.photo})`"></div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-sm" x-text="dollForm.name"></div>
+              <div class="text-[11px] text-neutral-500 truncate" x-text="dollForm.source || '原創 · 自製娃'"></div>
+            </div>
+            <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" :style="`background: ${paletteBg(dollForm.palette)}`">
+              <div x-html="dollSvgWithPalette(dollForm.palette, 36)"></div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <div x-show="!canSaveDoll" x-cloak class="text-[11px] text-neutral-500 text-center">
+        還缺：<span x-text="missingDollFields"></span>
+      </div>
+
+      <div class="h-4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div x-show="toast" x-cloak class="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] bg-emerald-500 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl toast-enter flex items-center gap-2">
+  <span>✅</span>
+  <span x-text="toast"></span>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- MOMENT MODAL                            -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div x-show="modalMoment" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" @click.self="modalMoment=null">
+  <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl modal-enter max-h-[92vh] overflow-y-auto">
+    <template x-if="modalMoment">
+      <div>
+        <div class="relative">
+          <div class="photo aspect-[4/5] sm:aspect-square" :style="`background-image: url(${modalMoment.photo})`">
+            <div class="doll-overlay doll-overlay-large" x-html="dollOverlayHtml(modalMoment.character, 96)"></div>
+          </div>
+          <button @click="aiOn = !aiOn"
+            :class="aiOn ? 'bg-emerald-500 text-white' : 'bg-white/90 text-neutral-700'"
+            class="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 z-10">
+            <span>✨</span>
+            <span x-text="aiOn ? 'AI 已修圖' : 'AI 修圖 預覽'"></span>
+          </button>
+          <div x-show="aiOn" class="ai-overlay" x-cloak>已自動去路人 · 增強光線</div>
+          <button @click="modalMoment=null" class="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-lg z-10">×</button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <button @click="openCharacter(modalMoment.character)" class="chip chip-rose">
+              <span>🎭</span><span x-text="characters[modalMoment.character].name"></span>
+            </button>
+            <button @click="openLocation(modalMoment.location)" class="chip chip-mint">
+              <span>📍</span><span x-text="locations[modalMoment.location].name"></span>
+            </button>
+            <template x-for="v in modalMoment.vibes" :key="v">
+              <span class="chip chip-lilac"><span x-text="`#${v}`"></span></span>
+            </template>
+          </div>
+
+          <div class="text-sm text-neutral-700 leading-relaxed" x-text="modalMoment.caption"></div>
+
+          <div class="bg-neutral-50 rounded-2xl p-4 space-y-3">
+            <div class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider">交叉探索</div>
+            <button @click="openCharacter(modalMoment.character)" class="w-full text-left flex items-center justify-between p-2 bg-white rounded-xl hover:bg-rose-50">
+              <div>
+                <div class="text-xs text-neutral-500">更多 <span class="font-bold text-neutral-800" x-text="characters[modalMoment.character].name"></span> 的紀錄</div>
+                <div class="text-[10px] text-neutral-500" x-text="`${momentsBy(modalMoment.character).length} 則 · ${momentsBy(modalMoment.character).map(m=>m.location).filter((v,i,a)=>a.indexOf(v)===i).length} 個地點`"></div>
+              </div>
+              <span class="text-neutral-300">→</span>
+            </button>
+            <button @click="openLocation(modalMoment.location)" class="w-full text-left flex items-center justify-between p-2 bg-white rounded-xl hover:bg-emerald-50">
+              <div>
+                <div class="text-xs text-neutral-500">同地點 <span class="font-bold text-neutral-800" x-text="locations[modalMoment.location].name"></span> 還有誰來過</div>
+                <div class="text-[10px] text-neutral-500" x-text="`${momentsAt(modalMoment.location).length} 則 · ${momentsAt(modalMoment.location).map(m=>m.character).filter((v,i,a)=>a.indexOf(v)===i).length} 個 IP`"></div>
+              </div>
+              <span class="text-neutral-300">→</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button @click="alert('mock：實作後會生成含浮水印 IG-ready 圖')" class="p-3 bg-gradient-to-br from-pink-500 to-orange-400 text-white rounded-xl text-xs font-bold">
+              📲 分享回 IG
+            </button>
+            <button @click="alert('mock：實作後會生成 Threads 卡片連結')" class="p-3 bg-neutral-900 text-white rounded-xl text-xs font-bold">
+              🧵 分享回 Threads
+            </button>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- CHARACTER MODAL                         -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div x-show="modalCharacter" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" @click.self="modalCharacter=null">
+  <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl modal-enter max-h-[92vh] overflow-y-auto">
+    <template x-if="modalCharacter">
+      <div>
+        <div class="relative h-40 flex items-end p-5" :style="`background: ${characterBg(modalCharacter.id)}`">
+          <button @click="modalCharacter=null" class="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-lg">×</button>
+          <div class="flex items-end gap-3">
+            <div class="w-20 h-20 rounded-2xl bg-white/80 flex items-center justify-center border-4 border-white shadow-lg overflow-hidden">
+              <template x-if="modalCharacter.photo">
+                <div class="w-full h-full bg-cover bg-center" :style="`background-image: url(${modalCharacter.photo})`"></div>
+              </template>
+              <template x-if="!modalCharacter.photo">
+                <div x-html="dollSvg(modalCharacter.id, 60)"></div>
+              </template>
+            </div>
+            <div class="pb-1">
+              <div class="font-bold text-lg" x-text="modalCharacter.name"></div>
+              <div class="text-xs text-neutral-700" x-text="modalCharacter.source"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-rose-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="momentsBy(modalCharacter.id).length"></div>
+              <div class="text-[10px] text-neutral-600">總打卡數</div>
+            </div>
+            <div class="bg-emerald-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="momentsBy(modalCharacter.id).map(m=>m.location).filter((v,i,a)=>a.indexOf(v)===i).length"></div>
+              <div class="text-[10px] text-neutral-600">去過地點</div>
+            </div>
+            <div class="bg-amber-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="momentsBy(modalCharacter.id).map(m=>m.user).filter((v,i,a)=>a.indexOf(v)===i).length"></div>
+              <div class="text-[10px] text-neutral-600">推主人數</div>
+            </div>
+          </div>
+
+          <template x-if="momentsBy(modalCharacter.id).length > 0">
+            <div>
+              <div class="text-sm font-bold mb-2">這個角色去過哪</div>
+              <div class="grid grid-cols-3 gap-2">
+                <template x-for="m in momentsBy(modalCharacter.id)" :key="m.id">
+                  <div class="card" @click="modalCharacter=null; openMoment(m.id)">
+                    <div class="photo aspect-square" :style="`background-image: url(${m.photo})`">
+                      <div class="doll-overlay" x-html="dollOverlayHtml(m.character, 36)"></div>
+                      <div class="photo-overlay">
+                        <div class="text-[9px] font-bold" x-text="locations[m.location].name"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="momentsBy(modalCharacter.id).length === 0">
+            <div class="bg-neutral-50 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-2">📸</div>
+              <div class="text-sm font-bold mb-1">還沒帶它出過門</div>
+              <div class="text-[11px] text-neutral-500 mb-4">當第一個記錄者</div>
+              <button @click="modalCharacter=null; quickRecordWith(modalCharacter.id)" class="px-4 py-2 bg-neutral-900 text-white rounded-full text-xs font-bold">用它新打卡</button>
+            </div>
+          </template>
+
+          <button @click="modalCharacter=null; quickRecordWith(modalCharacter.id)" class="w-full p-3 bg-neutral-900 text-white rounded-2xl text-sm font-bold">
+            📸 帶這隻娃打卡
+          </button>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- LOCATION MODAL                          -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div x-show="modalLocation" x-cloak class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" @click.self="modalLocation=null">
+  <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl modal-enter max-h-[92vh] overflow-y-auto">
+    <template x-if="modalLocation">
+      <div>
+        <div class="relative h-40 bg-cover bg-center" :style="`background-image: url(${modalLocation.image})`">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <button @click="modalLocation=null" class="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-lg">×</button>
+          <div class="absolute bottom-3 left-5 right-5 text-white">
+            <div class="flex items-center gap-2 mb-1">
+              <div class="font-bold text-lg" x-text="modalLocation.name"></div>
+              <template x-if="modalLocation.friendly">
+                <span class="text-[10px] px-2 py-0.5 bg-emerald-500 rounded-full">🍵 友善店家</span>
+              </template>
+            </div>
+            <div class="text-xs opacity-90" x-text="modalLocation.area"></div>
+          </div>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <template x-for="t in modalLocation.tags" :key="t">
+              <span class="chip chip-mint"><span x-text="`#${t}`"></span></span>
+            </template>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-rose-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="momentsAt(modalLocation.id).map(m=>m.character).filter((v,i,a)=>a.indexOf(v)===i).length"></div>
+              <div class="text-[10px] text-neutral-600">IP 來過</div>
+            </div>
+            <div class="bg-emerald-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="momentsAt(modalLocation.id).length"></div>
+              <div class="text-[10px] text-neutral-600">總打卡</div>
+            </div>
+            <div class="bg-amber-50 rounded-xl py-3">
+              <div class="font-bold text-xl" x-text="modalLocation.timeBest || '☀️'"></div>
+              <div class="text-[10px] text-neutral-600">建議時段</div>
+            </div>
+          </div>
+
+          <template x-if="momentsAt(modalLocation.id).length > 0">
+            <div>
+              <div class="text-sm font-bold mb-2">這裡有哪些 IP 來過</div>
+              <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                <template x-for="cid in momentsAt(modalLocation.id).map(m=>m.character).filter((v,i,a)=>a.indexOf(v)===i)" :key="cid">
+                  <button @click="modalLocation=null; openCharacter(cid)" class="flex-shrink-0 w-16 text-center">
+                    <div class="w-14 h-14 mx-auto rounded-2xl mb-1 flex items-center justify-center overflow-hidden" :style="`background: ${characterBg(cid)}`">
+                      <template x-if="characters[cid].photo">
+                        <div class="w-full h-full bg-cover bg-center" :style="`background-image: url(${characters[cid].photo})`"></div>
+                      </template>
+                      <template x-if="!characters[cid].photo">
+                        <div x-html="dollSvg(cid, 40)"></div>
+                      </template>
+                    </div>
+                    <div class="text-[10px] truncate" x-text="characters[cid].name"></div>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <button @click="modalLocation=null; quickRecordAt(modalLocation.id)" class="w-full p-3 bg-neutral-900 text-white rounded-2xl text-sm font-bold">
+            📸 帶娃在這裡打卡
+          </button>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<script>
+function dollTrip() {
+  return {
+    view: 'home',
+    vibeFilter: null,
+    aiOn: false,
+    modalMoment: null,
+    modalCharacter: null,
+    modalLocation: null,
+    modalCreate: false,
+    modalAddDoll: false,
+    isSubmitting: false,
+    toast: null,
+    nextMomentId: 100,
+    nextDollId: 1,
+    me: 'u1',
+
+    form: {
+      photo: null,
+      character: null,
+      location: null,
+      vibes: [],
+      caption: '',
+      aiOn: false,
+    },
+
+    dollForm: {
+      photo: null,
+      name: '',
+      source: '',
+      palette: 'rose',
+    },
+
+    palettes: [
+      { id: 'rin',   name: '蜂蜜黃', body: '#FFE9B0', accent: '#FFD56B', ear: '#FFEEC2', tuft: '#FFCC55' },
+      { id: 'rose',  name: '櫻花粉', body: '#FFD4D4', accent: '#F4A4A4', ear: '#FFE4E4', tuft: '#FF9999' },
+      { id: 'yor',   name: '夜墨黑', body: '#3F3F46', accent: '#E8A4A4', ear: '#52525B', tuft: '#1F1F24' },
+      { id: 'luna',  name: '雪白紫', body: '#FFFFFF', accent: '#D7C9E8', ear: '#F5F0FF', tuft: '#E9DCFF' },
+      { id: 'ren',   name: '薄荷綠', body: '#BFE3D4', accent: '#7AC4A0', ear: '#D4F5E2', tuft: '#5BAA85' },
+      { id: 'sky',   name: '晴空藍', body: '#BCE4FF', accent: '#5BAFEB', ear: '#D6F0FF', tuft: '#7CC0EB' },
+    ],
+
+    vibes: [
+      { tag: '文青咖啡', icon: '☕', color: '#FFE4D2' },
+      { tag: '友善店家', icon: '🍵', color: '#D4F5E2' },
+      { tag: '光線好', icon: '🌅', color: '#FFE9B0' },
+      { tag: '人少好拍', icon: '🤫', color: '#E9DCFF' },
+      { tag: '日系街景', icon: '🏯', color: '#FFD4D4' },
+      { tag: '聖地候選', icon: '⛩️', color: '#FFEEC2' },
+      { tag: '寵物友善', icon: '🐾', color: '#D4F5F5' },
+    ],
+
+    characters: {
+      rin: { id: 'rin', name: '鏡音リン', source: 'VOCALOID · 自製娃娃', palette: 'rin' },
+      anya: { id: 'anya', name: 'アーニャ', source: 'SPY×FAMILY · 棉花娃', palette: 'rose' },
+      yor: { id: 'yor', name: 'ヨル・フォージャー', source: 'SPY×FAMILY · 棉花娃', palette: 'yor' },
+      luna: { id: 'luna', name: '露娜', source: '原創角色 · 自製娃', palette: 'luna' },
+      ren: { id: 'ren', name: '雀ヶ森レン', source: '原創 cosplay · 立牌', palette: 'ren' },
+    },
+
+    locations: {
+      now_cafe: { id: 'now_cafe', name: '鬧咖啡 Now Cafe', area: '台北 · 信義',
+        image: 'https://loremflickr.com/600/400/cafe,interior,warm/all?lock=21',
+        tags: ['文青咖啡', '友善店家', '光線好'], friendly: true, timeBest: '下午 2-4pm' },
+      omote: { id: 'omote', name: '表參道咖啡', area: '新北 · 板橋',
+        image: 'https://loremflickr.com/600/400/japanese,coffee,minimal/all?lock=22',
+        tags: ['日系街景', '人少好拍', '光線好'], friendly: true, timeBest: '上午 10am-12pm' },
+      tajima: { id: 'tajima', name: '田島模型店', area: '台北 · 中山',
+        image: 'https://loremflickr.com/600/400/hobby,model,store/all?lock=23',
+        tags: ['聖地候選', '日系街景'], friendly: false, timeBest: '營業時間' },
+      ximen: { id: 'ximen', name: '西門紅樓', area: '台北 · 萬華',
+        image: 'https://loremflickr.com/600/400/red,brick,taipei/all?lock=24',
+        tags: ['日系街景', '光線好'], friendly: false, timeBest: '黃昏' },
+      tamsui: { id: 'tamsui', name: '淡水老街', area: '新北 · 淡水',
+        image: 'https://loremflickr.com/600/400/sunset,harbor,asia/all?lock=25',
+        tags: ['日系街景', '光線好'], friendly: false, timeBest: '黃昏' },
+      kami: { id: 'kami', name: 'KAMI 神社咖啡', area: '台北 · 大安',
+        image: 'https://loremflickr.com/600/400/cafe,wood,vintage/all?lock=26',
+        tags: ['聖地候選', '友善店家', '文青咖啡'], friendly: true, timeBest: '下午' },
+      jiufen: { id: 'jiufen', name: '九份老街', area: '新北 · 瑞芳',
+        image: 'https://loremflickr.com/600/400/jiufen,lantern,night/all?lock=27',
+        tags: ['聖地候選', '日系街景'], friendly: false, timeBest: '黃昏' },
+      gtin: { id: 'gtin', name: '古亭河濱', area: '台北 · 古亭',
+        image: 'https://loremflickr.com/600/400/park,river,grass/all?lock=28',
+        tags: ['人少好拍', '光線好', '寵物友善'], friendly: false, timeBest: '日落 1 小時前' },
+      animation_warehouse: { id: 'animation_warehouse', name: '動畫倉庫', area: '台北 · 西門',
+        image: 'https://loremflickr.com/600/400/anime,store,figure/all?lock=29',
+        tags: ['聖地候選'], friendly: false, timeBest: '營業時間' },
+      ls: { id: 'ls', name: '龍山寺', area: '台北 · 萬華',
+        image: 'https://loremflickr.com/600/400/temple,asia,red/all?lock=30',
+        tags: ['日系街景', '聖地候選'], friendly: false, timeBest: '清晨' },
+    },
+
+    moments: [
+      { id: 'm1', character: 'rin', location: 'now_cafe', user: 'u1',
+        photo: 'https://loremflickr.com/600/600/cafe,coffee,table,window/all?lock=1',
+        vibes: ['文青咖啡', '光線好'],
+        caption: '帶リン來鬧咖啡，光線剛好打在她臉上。店員看到還誇娃可愛。' },
+      { id: 'm2', character: 'anya', location: 'omote', user: 'u2',
+        photo: 'https://loremflickr.com/600/600/coffee,wood,minimal/all?lock=2',
+        vibes: ['日系街景', '人少好拍'],
+        caption: 'アーニャ第一次來新北！表參道角度真的很像日本。' },
+      { id: 'm3', character: 'rin', location: 'omote', user: 'u3',
+        photo: 'https://loremflickr.com/600/600/japanese,architecture,street/all?lock=3',
+        vibes: ['日系街景', '光線好'],
+        caption: '聽說新北也可以拍 → 真的可以。' },
+      { id: 'm4', character: 'yor', location: 'kami', user: 'u1',
+        photo: 'https://loremflickr.com/600/600/red,wood,interior/all?lock=4',
+        vibes: ['聖地候選', '文青咖啡'],
+        caption: 'KAMI 神社咖啡的紅色超適合 ヨル。' },
+      { id: 'm5', character: 'luna', location: 'gtin', user: 'u4',
+        photo: 'https://loremflickr.com/600/600/grass,river,park/all?lock=5',
+        vibes: ['人少好拍', '寵物友善'],
+        caption: '露娜在河濱很自在，旁邊狗狗超親人。' },
+      { id: 'm6', character: 'rin', location: 'tajima', user: 'u2',
+        photo: 'https://loremflickr.com/600/600/store,window,toy/all?lock=6',
+        vibes: ['聖地候選', '日系街景'],
+        caption: '田島模型店！リン來朝聖。' },
+      { id: 'm7', character: 'anya', location: 'now_cafe', user: 'u3',
+        photo: 'https://loremflickr.com/600/600/coffee,latte,art/all?lock=7',
+        vibes: ['文青咖啡', '友善店家'],
+        caption: 'アーニャ × 鬧咖啡 = peanuts。' },
+      { id: 'm8', character: 'ren', location: 'ximen', user: 'u5',
+        photo: 'https://loremflickr.com/600/600/sunset,brick,wall/all?lock=8',
+        vibes: ['日系街景', '光線好'],
+        caption: '黃昏的西門紅樓搭立牌剛剛好。' },
+      { id: 'm9', character: 'rin', location: 'jiufen', user: 'u4',
+        photo: 'https://loremflickr.com/600/600/lantern,night,red/all?lock=9',
+        vibes: ['聖地候選', '日系街景'],
+        caption: 'リン上九份。' },
+      { id: 'm10', character: 'luna', location: 'kami', user: 'u2',
+        photo: 'https://loremflickr.com/600/600/cafe,wood,books/all?lock=10',
+        vibes: ['友善店家', '文青咖啡'],
+        caption: 'KAMI 老闆會幫客人拍娃。' },
+      { id: 'm11', character: 'anya', location: 'tamsui', user: 'u1',
+        photo: 'https://loremflickr.com/600/600/sunset,harbor,golden/all?lock=11',
+        vibes: ['日系街景', '光線好'],
+        caption: '淡水黃昏 × peanuts。' },
+      { id: 'm12', character: 'rin', location: 'ls', user: 'u3',
+        photo: 'https://loremflickr.com/600/600/temple,red,morning/all?lock=12',
+        vibes: ['日系街景', '聖地候選'],
+        caption: '清晨龍山寺，リン很莊重。' },
+    ],
+
+    badges: [
+      { id: 'b1', name: '初次曬娃', icon: '🌱', unlocked: true, progress: 1, total: 1 },
+      { id: 'b2', name: '跨區巡禮', icon: '🗺️', unlocked: true, progress: 2, total: 2 },
+      { id: 'b3', name: '友善店家發現者', icon: '🍵', unlocked: true, progress: 3, total: 3 },
+      { id: 'b4', name: '聖地巡礼者', icon: '⛩️', unlocked: false, progress: 1, total: 5 },
+      { id: 'b5', name: '同 IP 達人', icon: '🏆', unlocked: false, progress: 4, total: 10 },
+      { id: 'b6', name: '黃昏獵人', icon: '🌅', unlocked: false, progress: 2, total: 5 },
+      { id: 'b7', name: '場景策展人', icon: '🎨', unlocked: false, progress: 0, total: 5 },
+      { id: 'b8', name: '凌晨派', icon: '🌙', unlocked: false, progress: 0, total: 3 },
+    ],
+
+    // ─────────── COMPUTED ───────────
+    get myMoments() {
+      return this.moments.filter(m => m.user === this.me);
+    },
+
+    get myDolls() {
+      const usedIds = [...new Set(this.myMoments.map(m => m.character))];
+      const userCreated = Object.values(this.characters).filter(c => c.userCreated);
+      const merged = [
+        ...userCreated,
+        ...usedIds.map(id => this.characters[id]).filter(c => c && !c.userCreated),
+      ];
+      const seen = new Set();
+      return merged.filter(c => {
+        if (seen.has(c.id)) return false;
+        seen.add(c.id);
+        return true;
+      });
+    },
+
+    get filteredMoments() {
+      let list = [...this.moments].reverse();
+      if (this.vibeFilter) list = list.filter(m => m.vibes.includes(this.vibeFilter));
+      return list;
+    },
+
+    get todaySuggestion() {
+      if (this.myDolls.length === 0) return null;
+      const lastMoment = [...this.myMoments].pop();
+      const charId = lastMoment ? lastMoment.character : this.myDolls[0].id;
+      const visited = new Set(this.myMoments.filter(m=>m.character===charId).map(m=>m.location));
+      const peerLocs = {};
+      this.moments.filter(m => m.character === charId && m.user !== this.me)
+        .forEach(m => { if (!visited.has(m.location)) peerLocs[m.location] = (peerLocs[m.location]||0)+1; });
+      const ranked = Object.entries(peerLocs).sort((a,b)=>b[1]-a[1]);
+      if (ranked.length === 0) {
+        const candidates = Object.values(this.locations).filter(l => !visited.has(l.id));
+        if (candidates.length === 0) return null;
+        return { charId, locId: candidates[0].id, peerCount: 0 };
+      }
+      return { charId, locId: ranked[0][0], peerCount: ranked[0][1] };
+    },
+
+    get trackedFeed() {
+      const usedChars = new Set(this.myMoments.map(m => m.character));
+      return this.moments
+        .filter(m => m.user !== this.me && usedChars.has(m.character))
+        .slice(-6)
+        .reverse();
+    },
+
+    get canSubmit() {
+      return this.form.photo && this.form.character && this.form.location && !this.isSubmitting;
+    },
+
+    get missingFields() {
+      const m = [];
+      if (!this.form.photo) m.push('照片');
+      if (!this.form.character) m.push('角色');
+      if (!this.form.location) m.push('地點');
+      return m.join('、');
+    },
+
+    get canSaveDoll() {
+      return this.dollForm.photo && this.dollForm.name.trim() && this.dollForm.palette;
+    },
+
+    get missingDollFields() {
+      const m = [];
+      if (!this.dollForm.photo) m.push('照片');
+      if (!this.dollForm.name.trim()) m.push('名字');
+      return m.join('、');
+    },
+
+    // ─────────── METHODS ───────────
+    momentsBy(charId) { return this.moments.filter(m => m.character === charId); },
+    momentsAt(locId) { return this.moments.filter(m => m.location === locId); },
+
+    openMoment(id) { this.modalMoment = this.moments.find(m => m.id === id); this.aiOn = false; },
+    openCharacter(id) { this.modalCharacter = this.characters[id]; },
+    openLocation(id) { this.modalLocation = this.locations[id]; },
+
+    quickRecordWith(charId) {
+      this.openCreateModal();
+      this.form.character = charId;
+    },
+    quickRecordAt(locId) {
+      this.openCreateModal();
+      this.form.location = locId;
+    },
+
+    openCreateModal() {
+      this.modalCreate = true;
+      this.form = { photo: null, character: null, location: null, vibes: [], caption: '', aiOn: false };
+    },
+    closeCreateModal() {
+      if (this.form.photo || this.form.character || this.form.location || this.form.caption) {
+        if (!confirm('放棄編輯？已填內容會遺失。')) return;
+      }
+      this.modalCreate = false;
+    },
+
+    openAddDoll() {
+      this.dollForm = { photo: null, name: '', source: '', palette: 'rose' };
+      this.modalAddDoll = true;
+    },
+    closeAddDoll() {
+      if (this.dollForm.photo || this.dollForm.name) {
+        if (!confirm('放棄新增？已填內容會遺失。')) return;
+      }
+      this.modalAddDoll = false;
+    },
+
+    handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('檔案過大，最大 10MB'); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => { this.form.photo = ev.target.result; };
+      reader.readAsDataURL(file);
+    },
+
+    handleDollPhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('檔案過大，最大 10MB'); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => { this.dollForm.photo = ev.target.result; };
+      reader.readAsDataURL(file);
+    },
+
+    saveNewDoll() {
+      if (!this.canSaveDoll) return;
+      const id = 'user_' + (this.nextDollId++);
+      this.characters[id] = {
+        id,
+        name: this.dollForm.name.trim(),
+        source: this.dollForm.source.trim() || '原創 · 自製娃',
+        palette: this.dollForm.palette,
+        photo: this.dollForm.photo,
+        userCreated: true,
+      };
+      this.modalAddDoll = false;
+      // auto-select in create form if open
+      if (this.modalCreate) this.form.character = id;
+      this.showToast(`已新增 ${this.characters[id].name}`);
+    },
+
+    toggleVibe(tag) {
+      const idx = this.form.vibes.indexOf(tag);
+      if (idx >= 0) this.form.vibes.splice(idx, 1);
+      else if (this.form.vibes.length < 3) this.form.vibes.push(tag);
+      else this.showToast('最多選 3 個 vibe');
+    },
+
+    useCurrentLocation() {
+      const candidates = ['now_cafe', 'omote', 'gtin', 'kami', 'tamsui'];
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      this.form.location = pick;
+      this.showToast(`✓ 已偵測：${this.locations[pick].name}（mock）`);
+    },
+
+    submitMoment() {
+      if (!this.canSubmit) return;
+      this.isSubmitting = true;
+      setTimeout(() => {
+        const newMoment = {
+          id: 'm' + (this.nextMomentId++),
+          character: this.form.character,
+          location: this.form.location,
+          user: this.me,
+          photo: this.form.photo,
+          vibes: [...this.form.vibes],
+          caption: this.form.caption || '（沒寫描述）',
+          isNew: true,
+        };
+        this.moments.push(newMoment);
+        this.isSubmitting = false;
+        this.modalCreate = false;
+        this.view = 'home';
+        this.vibeFilter = null;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.showToast(`已發布到 doll_trip ${this.form.aiOn ? '· AI 已修圖' : ''}`);
+        setTimeout(() => { newMoment.isNew = false; }, 6000);
+      }, 800);
+    },
+
+    showToast(msg) {
+      this.toast = msg;
+      setTimeout(() => { this.toast = null; }, 2400);
+    },
+
+    // ─────────── RENDERING HELPERS ───────────
+    paletteBy(charId) {
+      const c = this.characters[charId];
+      const pid = c ? c.palette : null;
+      return this.palettes.find(p => p.id === pid) || this.palettes[1];
+    },
+
+    paletteBg(paletteId) {
+      const p = this.palettes.find(p => p.id === paletteId) || this.palettes[1];
+      return `linear-gradient(135deg, ${p.body}, ${p.accent})`;
+    },
+
+    characterBg(charId) {
+      const p = this.paletteBy(charId);
+      return `linear-gradient(135deg, ${p.body}, ${p.accent})`;
+    },
+
+    dollSvg(charId, size = 60) {
+      const p = this.paletteBy(charId);
+      return this._svg(p, size);
+    },
+
+    dollSvgWithPalette(paletteId, size = 60) {
+      const p = this.palettes.find(p => p.id === paletteId) || this.palettes[1];
+      return this._svg(p, size);
+    },
+
+    dollOverlayHtml(charId, size = 60) {
+      const c = this.characters[charId];
+      if (!c) return '';
+      if (c.photo) {
+        return `<div class="doll-overlay-photo" style="width:${size}px;height:${size}px;background-image:url(${c.photo});"></div>`;
+      }
+      return this.dollSvg(charId, size);
+    },
+
+    _svg(p, size) {
+      return `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:${size}px;height:${size}px;display:block;">
+          <ellipse cx="33" cy="22" rx="7" ry="13" fill="${p.ear}" stroke="white" stroke-width="2.5"/>
+          <ellipse cx="67" cy="22" rx="7" ry="13" fill="${p.ear}" stroke="white" stroke-width="2.5"/>
+          <ellipse cx="33" cy="24" rx="3" ry="8" fill="${p.accent}" opacity="0.7"/>
+          <ellipse cx="67" cy="24" rx="3" ry="8" fill="${p.accent}" opacity="0.7"/>
+          <circle cx="50" cy="42" r="22" fill="${p.body}" stroke="white" stroke-width="2.5"/>
+          <ellipse cx="50" cy="76" rx="24" ry="20" fill="${p.body}" stroke="white" stroke-width="2.5"/>
+          <ellipse cx="42" cy="78" rx="3" ry="6" fill="${p.tuft}" opacity="0.4"/>
+          <ellipse cx="58" cy="78" rx="3" ry="6" fill="${p.tuft}" opacity="0.4"/>
+          <circle cx="42" cy="40" r="3" fill="#2A2A33"/>
+          <circle cx="58" cy="40" r="3" fill="#2A2A33"/>
+          <circle cx="43" cy="39" r="0.8" fill="white"/>
+          <circle cx="59" cy="39" r="0.8" fill="white"/>
+          <path d="M 45 48 Q 50 51 55 48" stroke="#2A2A33" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="38" cy="46" r="2.5" fill="${p.accent}" opacity="0.55"/>
+          <circle cx="62" cy="46" r="2.5" fill="${p.accent}" opacity="0.55"/>
+        </svg>
+      `;
+    },
+  }
+}
+</script>
+
+</body>
+</html>
